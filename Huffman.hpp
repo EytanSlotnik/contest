@@ -26,14 +26,6 @@ typedef struct huff_tree {
     uint8_t code_lengths[256];
 } huff_tree;
 
-typedef enum TREE {
-    SAMP1,
-    SAMP2,
-    SAMP3,
-    SAMP4,
-    BOOK,
-    BOOK2,
-    NUM_OF_TREES
-} TREE;
+
 
 #endif //PROJECT__HUFFMAN_HPP

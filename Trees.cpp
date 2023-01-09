@@ -17,7 +17,8 @@ int main(){
                                         "uint32_t freqs[NUM_OF_TREES][256] = {\n";
 
 
-    const char *files[] = {"Samp1.bin", "Samp2.bin", "Samp3.bin", "Samp4.bin", "book.bin", "book2.bin"};
+    const char *files[] = {"Samp1.bin", "Samp2.bin", "Samp3.bin", "Samp4.bin", "book.bin", "book2.bin",
+                           "covid.bin", "py.bin", "py2.bin", "ishur.bin", "pic.bin"};
 
     for (uint32_t i = 0; i < sizeof(files) / sizeof(files[0]); i++){
         out << "{";
