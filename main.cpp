@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     data.size = fread(data.data, 1, BUFFER_SIZE, fp);
     fclose(fp);
 
-    METHOD methods[] = {HUF};
+    METHOD methods[] = {BWT, MTF,HUF, RLE};
 
 //    if (strcmp(argv[3], "compress") == 0){
 //        compress(&data, methods, sizeof(methods) / sizeof(methods[1]));
@@ -22,8 +22,8 @@ int main(int argc, char *argv[]) {
 
 	compress(&data, methods, sizeof(methods) / sizeof(methods[1]));
 	printf("%d\n", data.size);
-//	decompress(&data, methods, sizeof(methods) / sizeof(methods[1]));
-//    printf("%d", data.size);
+	decompress(&data, methods, sizeof(methods) / sizeof(methods[1]));
+    printf("%d", data.size);
 
 
 

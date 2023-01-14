@@ -8,7 +8,7 @@
 #include <functional>
 #include <cmath>
 #include <numeric>
-#include <unordered_map>;
+#include <unordered_set>;
 
 #define SET_BIT(arr, index) (arr[index >> 3] |= (1 << (index & 7)))
 #define UNSET_BIT(arr, index) (arr[index >> 3] &= ~(1 << (index & 7)))
@@ -50,11 +50,11 @@ void canonical_huffman_codes(canonical_code codes[256])
 					codes[i].length - 1 - j,
 					GET_INT64(code, (j)));
 		}
-		for (uint32_t j = 0; j < codes[i].length; j++)
-		{
-			std::cout << GET_INT64(codes[i].code, j);
-		}
-		std::cout << std::endl;
+//		for (uint32_t j = 0; j < codes[i].length; j++)
+//		{
+//			std::cout << GET_INT64(codes[i].code, j);
+//		}
+//		std::cout << std::endl;
 		if (i < 255)
 		{
 			code = (code + 1) << (codes[i + 1].length - codes[i].length);
@@ -69,7 +69,83 @@ void canonical_huffman_codes(canonical_code codes[256])
 
 void canonical_encode(Data_Buffer* data, canonical_code codes[256])
 {
-//	uint8_t
+	uint32_t new_size = 0;
+	uint8_t* old = new uint8_t[data->size];
+	memcpy(old, data->data, data->size);
+	for (uint32_t i = 0; i < data->size; i++)
+	{
+		for (uint32_t j = 0; j < codes[old[i]].length; j++)
+		{
+			if (GET_INT64(codes[old[i]].code, j))
+			{
+				SET_BIT(data->data, new_size);
+			}
+			else
+			{
+				UNSET_BIT(data->data, new_size);
+			}
+			new_size++;
+		}
+	}
+	data->size = new_size;
+
+}
+
+// costum hash function for canonical_code
+
+
+struct hash
+{
+	std::size_t operator()(const canonical_code& k) const
+	{
+		return k.code;
+	}
+};
+
+// costum equality function for canonical_code
+
+struct equal_to
+{
+	bool operator()(const canonical_code& lhs, const canonical_code& rhs) const
+	{
+		return lhs.code == rhs.code && lhs.length == rhs.length;
+	}
+};
+
+void canonical_decode(Data_Buffer* data, canonical_code codes[256])
+{
+
+	// crest a set from code to symbol with costum hash and equality functions
+	std::unordered_set<canonical_code, hash, equal_to> set;
+
+	// create a map from code to symbol
+	for (uint32_t i = 0; i < 256; i++)
+	{
+		if (codes[i].length == 0)
+		{
+			continue;
+		}
+		set.insert(codes[i]);
+	}
+
+	uint32_t new_size = 0;
+	uint8_t* old = new uint8_t[data->size];
+	memcpy(old, data->data, data->size);
+
+	canonical_code code = { 0, 0, 0 };
+	for (uint32_t i = 0; i < data->size; i++)
+	{
+		SET_INT64(code.code, code.length, GET_BIT(old, i));
+		code.length++;
+		if (set.find(code) != set.end())
+		{
+			data->data[new_size] = set.find(code)->symbol;
+			new_size++;
+			code.code = 0;
+			code.length = 0;
+		}
+	}
+	data->size = new_size;
 }
 
 std::ostream& operator<<(std::ostream& os, node& n)
@@ -219,7 +295,8 @@ void HUF_transform(Data_Buffer* data)
 		codes[i].code = 0;
 	}
 	canonical_huffman_codes(codes);
-	encode_with_tree(data, tree);
+	canonical_encode(data, codes);
+	//	encode_with_tree(data, tree);
 
 	uint32_t j = data->size;
 	while ((j & 7) != 0)
@@ -230,6 +307,10 @@ void HUF_transform(Data_Buffer* data)
 	uint32_t* int_end = (uint32_t*)(data->data + (j / 8));
 	*(int_end) = data->size;
 	data->size = (j / 8) + sizeof(uint32_t);
+	for (uint32_t i = 0; i < 256; i++)
+	{
+		data->data[data->size++] = codes[i].length;
+	}
 
 }
 
@@ -262,25 +343,43 @@ void decode_with_tree(Data_Buffer* data, huff_tree& tree)
 
 void HUF_inverse(Data_Buffer* data)
 {
-	huff_tree tree = {0};
-
-//    uint8_t freq_idx = data->data[--data->size];
-	data->size = *((uint32_t*)(data->data + data->size - 4));
-	for (uint32_t i = 0; i < data->size; i++)
+	uint8_t* len_arr = data->data + data->size - 256;
+	data->size -= 256;
+	canonical_code codes[256];
+	for (uint32_t i = 0; i < 256; i++)
 	{
-		if (GET_BIT(data->data, i) == 1)
+		codes[i].symbol = i;
+		if (len_arr[i] > 0)
 		{
-			int counter = 0;
-			while (GET_BIT(data->data, i) == 1)
-			{
-				i++;
-				counter++;
-			}
-			if (counter > 8)
-				printf("%d ", counter);
+			codes[i].length = len_arr[i];
 		}
+		else
+		{
+			codes[i].length = 0;
+		}
+		codes[i].code = 0;
 	}
-//    create_tree(freqs[freq_idx], tree);
+	canonical_huffman_codes(codes);
 
-//    decode_with_tree(data, tree);
+	data->size = *((uint32_t*)(data->data + data->size - 4));
+
+//	for (uint32_t i = 0; i < data->size; i++)
+//	{
+//		if (GET_BIT(data->data, i) == 1)
+//		{
+//			int counter = 0;
+//			while (GET_BIT(data->data, i) == 1)
+//			{
+//				i++;
+//				counter++;
+//			}
+//			if (counter > 8)
+//				printf("%d ", counter);
+//		}
+//	}
+
+
+
+
+	canonical_decode(data, codes);
 }
