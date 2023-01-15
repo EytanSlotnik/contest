@@ -26,7 +26,8 @@ typedef enum METHOD
 	BWT,
 	MTF,
 	HUF,
-	RLE
+	RLE,
+    LZ
 } METHOD;
 
 

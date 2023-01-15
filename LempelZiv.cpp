@@ -2,7 +2,7 @@
 // Created by reuto on 15/01/2023.
 //
 
-#include "LempelZiv.h"
+#include "LempelZiv.hpp"
 #include <stdio.h>
 #include <conio.h>
 
@@ -30,7 +30,6 @@ void init() {
         INT_TO_ASCII[i] = s;
     }
 }
-
 
 
 string decompress(string encoded_data) {
@@ -99,6 +98,17 @@ string compress(string data) {
         bits += bitset<9>(compressed[i]).to_string();
     }
     return bits;
+}
+
+void LZ_transform(Data_Buffer* data){
+    string s = compress(std:: string(reinterpret_cast<const char *>(data->data)));
+    data->data=(uint8_t*)&*s.begin();
+    data->size=s.length();
+}
+void LZ_inverse(Data_Buffer* data){
+    string s = decompress(std:: string(reinterpret_cast<const char *>(data->data)));
+    data->data=(uint8_t*)&*s.begin();
+    data->size=s.length();
 }
 
 

@@ -11,12 +11,14 @@ typedef struct func_and_inv
 #include "MTF.hpp"
 #include "Huffman.hpp"
 #include "RLE.hpp"
+#include "LempelZiv.hpp"
 
 const func_and_inv method_map[] = {
 	[BWT] = {BWT_transform, BWT_inverse},
 	[MTF] = {MTF_transform, MTF_inverse},
 	[HUF] = {HUF_transform, HUF_inverse},
 	[RLE] = {RLE_transform, RLE_inverse},
+    [LZ] = {LZ_transform, LZ_inverse},
 };
 
 void compress(Data_Buffer* data, const METHOD methods[], uint32_t
