@@ -30,6 +30,9 @@ methods_list list_[] = {
 
     MAKE_METHODS_LIST(3, HUF, MTF, RLE),
     MAKE_METHODS_LIST(3, BWT, MTF, HUF),
+    MAKE_METHODS_LIST(2, LZ, HUF),
+    MAKE_METHODS_LIST(1, HUF),
+
 
 
 //	[] = {3, {BWT, MTF, RLE}},
@@ -38,7 +41,7 @@ methods_list list_[] = {
 //	[6] = {5, {BWT, MTF, RLE, HUF, RLE}},
 //	[7] = {3, {BWT, MTF, HUF}}
 };
-vector<METHOD> methods_to_choose_from{BWT, MTF, HUF, RLE};
+vector<METHOD> methods_to_choose_from{BWT, MTF, HUF, RLE, LZ};
 
 vector<vector<METHOD>> methods_list_new = printAllKLength(methods_to_choose_from, 4, methods_to_choose_from.size());
 
@@ -60,7 +63,7 @@ int main(int argc, char* argv[])
 	data.size = fread(data.data, 1, BUFFER_SIZE, fp);
 	fclose(fp);
 
-	METHOD methods[] = {BWT, MTF, HUF, RLE};
+	METHOD methods[] = {BWT, MTF, HUF, RLE, LZ};
 
     if (strcmp(argv[3], "compress") == 0)
     {
